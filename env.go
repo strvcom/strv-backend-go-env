@@ -122,14 +122,6 @@ func setValue(val string, rv reflect.Value) error {
 	}
 
 	switch fieldKind {
-	case reflect.Array, reflect.Slice, reflect.Struct:
-		um, ok := rv.Interface().(encoding.TextUnmarshaler)
-		if !ok {
-			return fmt.Errorf("field type %q does not implement encoding.TextUnmarshaler interface", fieldType)
-		}
-		if err := um.UnmarshalText([]byte(val)); err != nil {
-			return fmt.Errorf("unmarshal value %q: %w", val, err)
-		}
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		i, err := strconv.ParseInt(val, 10, int(fieldType.Size()))
 		if err != nil {
@@ -164,7 +156,16 @@ func setValue(val string, rv reflect.Value) error {
 		}
 		rv.Set(ptr)
 	default:
-		return fmt.Errorf("unsupported kind: %s", fieldKind)
+		// This case is not recommended, but it is allowed.
+		// This case is hit when a field type defines encoding.TextUnmashaler on value receiver.
+		// It is considered resonsibility of the caller to make sure this is the intended use-case.
+		um, ok := rv.Interface().(encoding.TextUnmarshaler)
+		if !ok {
+			return fmt.Errorf("field type %q does not implement encoding.TextUnmarshaler interface", fieldType)
+		}
+		if err := um.UnmarshalText([]byte(val)); err != nil {
+			return fmt.Errorf("unmarshal value %q: %w", val, err)
+		}
 	}
 	return nil
 
