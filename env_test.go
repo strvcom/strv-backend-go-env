@@ -11,16 +11,20 @@ import (
 )
 
 type testConfig struct {
-	PtrField            *string                    `env:"PTR_FIELD"`
-	StrField            string                     `env:"STR_FIELD"`
-	IntField            int                        `env:"INT_FIELD"`
-	BoolField           bool                       `env:"BOOL_FIELD"`
-	UintField           uint                       `env:"UIT_FIELD"`
-	FloatField          float64                    `env:"FLOAT_FIELD"`
-	ArrayField          *arrayWithTextUnmarshaller `env:"ARRAY_FIELD"`
-	TypedField          *enumWithTextUnmarshaller  `env:"TYPED_FIELD"`
-	StructField         *structWithTextUnmarshaller
-	StructFieldWithDive *structWithTextUnmarshaller `env:",dive"`
+	PtrField                       *string                     `env:"PTR_FIELD"`
+	StrField                       string                      `env:"STR_FIELD"`
+	IntField                       int                         `env:"INT_FIELD"`
+	BoolField                      bool                        `env:"BOOL_FIELD"`
+	UintField                      uint                        `env:"UIT_FIELD"`
+	FloatField                     float64                     `env:"FLOAT_FIELD"`
+	ArrayField                     *arrayWithTextUnmarshaller  `env:"ARRAY_FIELD"`
+	TypedField                     *enumWithTextUnmarshaller   `env:"TYPED_FIELD"`
+	TypedFieldNoPtr                enumWithTextUnmarshaller    `env:"TYPED_FIELD"`
+	StructField                    *structWithTextUnmarshaller `env:"STRUCT_FIELD"`
+	StructFieldNoPtr               structWithTextUnmarshaller  `env:"STRUCT_FIELD"`
+	StructNestedField              *structWithNestedField
+	StructNestedFieldWithDive      *structWithNestedField `env:",dive"`
+	StructNestedFieldWithDiveNoPtr structWithNestedField  `env:",dive"`
 }
 
 type enumWithTextUnmarshaller int
@@ -57,15 +61,19 @@ func (a *arrayWithTextUnmarshaller) UnmarshalText(text []byte) error {
 	return nil
 }
 
+type structWithNestedField struct {
+	StrField string `env:"STRUCT_NESTED_STR_FIELD"`
+}
+
 type structWithTextUnmarshaller struct {
-	StrField string `env:"STRUCT_STR_FIELD"`
+	str string
 }
 
 func (s *structWithTextUnmarshaller) UnmarshalText(text []byte) error {
 	if s == nil {
 		return fmt.Errorf("unmarshal text: nil pointer")
 	}
-	s.StrField = string(text)
+	s.str = string(text)
 	return nil
 }
 
@@ -98,20 +106,25 @@ func TestApplyWithPrefix(t *testing.T) {
 				assert.Equal(t, float64(1), tc.FloatField)
 				assert.Equal(t, &arrayWithTextUnmarshaller{"a", "b", "c"}, tc.ArrayField)
 				assert.Equal(t, em, *tc.TypedField)
-				assert.Equal(t, "test", tc.StructFieldWithDive.StrField)
+				assert.Equal(t, em, tc.TypedFieldNoPtr)
+				assert.Equal(t, structWithTextUnmarshaller{"test"}, *tc.StructField)
+				assert.Equal(t, structWithTextUnmarshaller{"test"}, tc.StructFieldNoPtr)
+				assert.Equal(t, "test", tc.StructNestedFieldWithDive.StrField)
+				assert.Equal(t, "test", tc.StructNestedFieldWithDiveNoPtr.StrField)
 				// left untouched
-				assert.Nil(t, tc.StructField)
+				assert.Nil(t, tc.StructNestedField)
 			},
 			envVars: map[string]string{
-				"TEST_PTR_FIELD":        "ptr",
-				"TEST_STR_FIELD":        "test",
-				"TEST_INT_FIELD":        "1",
-				"TEST_BOOL_FIELD":       "true",
-				"TEST_UIT_FIELD":        "1",
-				"TEST_FLOAT_FIELD":      "1.0",
-				"TEST_ARRAY_FIELD":      "a,b,c",
-				"TEST_TYPED_FIELD":      "c",
-				"TEST_STRUCT_STR_FIELD": "test",
+				"TEST_PTR_FIELD":               "ptr",
+				"TEST_STR_FIELD":               "test",
+				"TEST_INT_FIELD":               "1",
+				"TEST_BOOL_FIELD":              "true",
+				"TEST_UIT_FIELD":               "1",
+				"TEST_FLOAT_FIELD":             "1.0",
+				"TEST_ARRAY_FIELD":             "a,b,c",
+				"TEST_TYPED_FIELD":             "c",
+				"TEST_STRUCT_FIELD":            "test",
+				"TEST_STRUCT_NESTED_STR_FIELD": "test",
 			},
 		},
 	}
@@ -124,6 +137,7 @@ func TestApplyWithPrefix(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := ApplyWithPrefix(tt.args.target, tt.args.prefix); (err != nil) != tt.wantErr {
 				t.Errorf("ApplyWithPrefix() error = %v, wantErr %v", err, tt.wantErr)
+				t.FailNow()
 			}
 			tt.testFn(t, tt.args)
 		})

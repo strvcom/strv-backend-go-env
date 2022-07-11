@@ -111,6 +111,16 @@ func setValue(val string, rv reflect.Value) error {
 	fieldKind := rv.Kind()
 	fieldType := rv.Type()
 
+	if rv.CanAddr() && fieldKind != reflect.Pointer {
+		rf := rv.Addr()
+		if um, ok := rf.Interface().(encoding.TextUnmarshaler); ok {
+			if err := um.UnmarshalText([]byte(val)); err != nil {
+				return fmt.Errorf("unmarshal value %q: %w", val, err)
+			}
+			return nil
+		}
+	}
+
 	switch fieldKind {
 	case reflect.Array, reflect.Slice, reflect.Struct:
 		um, ok := rv.Interface().(encoding.TextUnmarshaler)
@@ -149,14 +159,8 @@ func setValue(val string, rv reflect.Value) error {
 	case reflect.Pointer:
 		typ := fieldType.Elem()
 		ptr := reflect.New(typ)
-		if um, ok := ptr.Interface().(encoding.TextUnmarshaler); ok {
-			if err := um.UnmarshalText([]byte(val)); err != nil {
-				return fmt.Errorf("unmarshal value %q: %w", val, err)
-			}
-		} else {
-			if err := setValue(val, ptr.Elem()); err != nil {
-				return fmt.Errorf("set value %q: %w", val, err)
-			}
+		if err := setValue(val, ptr.Elem()); err != nil {
+			return fmt.Errorf("set value %q: %w", val, err)
 		}
 		rv.Set(ptr)
 	default:
