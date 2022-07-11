@@ -1,6 +1,7 @@
 package env
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -10,10 +11,15 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func intPtr(i int) *int {
+	return &i
+}
+
 type testConfig struct {
 	PtrField                       *string                     `env:"PTR_FIELD"`
 	StrField                       string                      `env:"STR_FIELD"`
 	IntField                       int                         `env:"INT_FIELD"`
+	IntFieldNotSet                 int                         `env:"INT_FIELD_NOT_SET"`
 	BoolField                      bool                        `env:"BOOL_FIELD"`
 	UintField                      uint                        `env:"UIT_FIELD"`
 	FloatField                     float64                     `env:"FLOAT_FIELD"`
@@ -25,6 +31,7 @@ type testConfig struct {
 	StructNestedField              *structWithNestedField
 	StructNestedFieldWithDive      *structWithNestedField `env:",dive"`
 	StructNestedFieldWithDiveNoPtr structWithNestedField  `env:",dive"`
+	unexportedField                string
 }
 
 type enumWithTextUnmarshaller int
@@ -77,6 +84,30 @@ func (s *structWithTextUnmarshaller) UnmarshalText(text []byte) error {
 	return nil
 }
 
+type structErrUnmarshaller struct {
+	str string
+}
+
+func (s *structErrUnmarshaller) UnmarshalText(text []byte) error {
+	return errors.New("test_err")
+}
+
+type testConfigInvalidArray struct {
+	Arr []string `env:"ARR"`
+}
+
+type testConfigUnsupportedKind struct {
+	Num complex64 `env:"COMPLEX"`
+}
+
+type testConfigInvalidDive struct {
+	Info string `env:",dive"`
+}
+
+type testConfigUnmarshalErr struct {
+	StructErrUnmarshaler *structErrUnmarshaller `env:"STRUCT_ERR_UNMARSHALER"`
+}
+
 func TestApplyWithPrefix(t *testing.T) {
 	type args struct {
 		target any
@@ -126,6 +157,78 @@ func TestApplyWithPrefix(t *testing.T) {
 				"TEST_STRUCT_FIELD":            "test",
 				"TEST_STRUCT_NESTED_STR_FIELD": "test",
 			},
+		},
+		{
+			name: "invalid_array",
+			args: args{
+				target: &testConfigInvalidArray{},
+				prefix: "TEST",
+			},
+			testFn: func(t *testing.T, a args) {
+			},
+			envVars: map[string]string{
+				"TEST_ARR": `[test]`,
+			},
+			wantErr: true,
+		},
+		{
+			name: "invalid_kind",
+			args: args{
+				target: &testConfigUnsupportedKind{},
+				prefix: "TEST",
+			},
+			testFn: func(t *testing.T, a args) {
+			},
+			envVars: map[string]string{
+				"TEST_COMPLEX": `42`,
+			},
+			wantErr: true,
+		},
+		{
+			name: "invalid_dive",
+			args: args{
+				target: &testConfigInvalidDive{},
+				prefix: "TEST",
+			},
+			testFn: func(t *testing.T, a args) {
+			},
+			envVars: map[string]string{},
+			wantErr: true,
+		},
+		{
+			name: "invalid_config_type",
+			args: args{
+				target: testConfigInvalidDive{},
+				prefix: "TEST",
+			},
+			testFn: func(t *testing.T, a args) {
+			},
+			envVars: map[string]string{},
+			wantErr: true,
+		},
+		{
+			name: "invalid_not_config_type",
+			args: args{
+				target: intPtr(1),
+				prefix: "TEST",
+			},
+			testFn: func(t *testing.T, a args) {
+			},
+			envVars: map[string]string{},
+			wantErr: true,
+		},
+		{
+			name: "invalid_unmarshal",
+			args: args{
+				target: &testConfigUnmarshalErr{},
+				prefix: "TEST",
+			},
+			testFn: func(t *testing.T, a args) {
+			},
+			envVars: map[string]string{
+				"TEST_STRUCT_ERR_UNMARSHALER": "err",
+			},
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
