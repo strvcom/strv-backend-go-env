@@ -1,0 +1,42 @@
+linters:
+  # Disable all linters.
+  # Default: false
+  disable-all: true
+  # Enable specific linter
+  # https://golangci-lint.run/usage/linters/#enabled-by-default-linters
+  enable:
+    # defaults
+    - deadcode
+    - errcheck
+    - gosimple
+    - govet
+    - ineffassign
+    - staticcheck
+    - structcheck
+    - typecheck
+    - unused
+    - varcheck
+    # not defaults
+    - bodyclose
+    - contextcheck
+    - durationcheck
+    - errorlint
+    - exhaustive
+    # - exhaustruct
+    - goconst
+    - gocyclo
+    # - godot
+    # - gofmt
+    - gomnd
+    - ifshort
+    - ireturn
+    - revive
+    - unconvert
+    - unparam
+
+issues:
+  include:
+    - EXC0012 # exported (.+) should have comment( \(or a comment on this block\))? or be unexported
+    - EXC0013 # package comment should be of the form "(.+)...
+    - EXC0014 # package comment should be of the form "(.+)...
+    - EXC0015 # should have a package comment, unless it's in another file for this package
