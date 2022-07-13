@@ -5,11 +5,12 @@ import (
 	"reflect"
 )
 
-type ErrInvalidType struct {
+// InvalidTypeError is returned when the type of the target is not a valid type.
+type InvalidTypeError struct {
 	Type reflect.Value
 }
 
-func (e *ErrInvalidType) Error() string {
+func (e *InvalidTypeError) Error() string {
 	t := e.Type.Type()
 	k := e.Type.Kind()
 

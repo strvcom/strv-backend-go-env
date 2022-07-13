@@ -31,7 +31,7 @@ type testConfig struct {
 	StructNestedField              *structWithNestedField
 	StructNestedFieldWithDive      *structWithNestedField `env:",dive"`
 	StructNestedFieldWithDiveNoPtr structWithNestedField  `env:",dive"`
-	unexportedField                string
+	unexportedField                string                 //lint:ignore U1000 used by unit tests
 }
 
 type enumWithTextUnmarshaller int
@@ -84,9 +84,7 @@ func (s *structWithTextUnmarshaller) UnmarshalText(text []byte) error {
 	return nil
 }
 
-type structErrUnmarshaller struct {
-	str string
-}
+type structErrUnmarshaller struct{}
 
 func (s *structErrUnmarshaller) UnmarshalText(text []byte) error {
 	return errors.New("test_err")

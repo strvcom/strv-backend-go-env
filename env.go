@@ -9,7 +9,8 @@ import (
 )
 
 const (
-	envTag = "env"
+	decadicBase = 10
+	envTag      = "env"
 
 	// envVarAppPrefix is the environment variable that holds the prefix for the
 	// environment variables specified by the `env` tag.
@@ -34,17 +35,24 @@ func MustApply(target any) {
 func ApplyWithPrefix(target any, prefix string) error {
 	rv := reflect.ValueOf(target)
 
-	switch rv.Kind() {
+	switch rv.Kind() { // nolint:exhaustive
 	case reflect.Pointer:
 		typ := rv.Elem().Kind()
 		if typ != reflect.Struct || rv.IsNil() {
-			return &ErrInvalidType{rv}
+			return &InvalidTypeError{rv}
 		}
 	default:
-		return &ErrInvalidType{rv}
+		return &InvalidTypeError{rv}
 	}
 
 	return applyWithPrefix(rv.Elem(), prefix)
+}
+
+// MustApplyWithPrefix calls ApplyWithPrefix and panics on error.
+func MustApplyWithPrefix(target any, prefix string) {
+	if err := ApplyWithPrefix(target, prefix); err != nil {
+		panic(err)
+	}
 }
 
 func applyWithPrefix(rv reflect.Value, prefix string) error {
@@ -63,7 +71,7 @@ L:
 			continue L
 		case ",dive":
 			k := rf.Kind()
-			switch k {
+			switch k { // nolint:exhaustive
 			case reflect.Struct:
 				if err := applyWithPrefix(rf, prefix); err != nil {
 					return err
@@ -93,13 +101,6 @@ L:
 	return nil
 }
 
-// MustApplyWithPrefix calls ApplyWithPrefix and panics on error.
-func MustApplyWithPrefix(target any, prefix string) {
-	if err := ApplyWithPrefix(target, prefix); err != nil {
-		panic(err)
-	}
-}
-
 func envKey(envVar, prefix string) string {
 	if prefix != "" {
 		return fmt.Sprintf("%s_%s", prefix, envVar)
@@ -121,15 +122,15 @@ func setValue(val string, rv reflect.Value) error {
 		}
 	}
 
-	switch fieldKind {
+	switch fieldKind { //nolint:exhaustive
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		i, err := strconv.ParseInt(val, 10, int(fieldType.Size()))
+		i, err := strconv.ParseInt(val, decadicBase, int(fieldType.Size()))
 		if err != nil {
 			return err
 		}
 		rv.SetInt(i)
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-		u, err := strconv.ParseUint(val, 10, int(fieldType.Size()))
+		u, err := strconv.ParseUint(val, decadicBase, int(fieldType.Size()))
 		if err != nil {
 			return err
 		}

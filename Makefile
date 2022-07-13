@@ -14,3 +14,10 @@ vet:
 test:
 	set -eo pipefail
 	$(GO) test ./... -cover
+
+lint:
+ifeq ($(shell which golangci-lint),)
+	$(error command 'golangci-lint' not found)
+else
+	golangci-lint run ./...
+endif
