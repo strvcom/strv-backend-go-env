@@ -6,11 +6,16 @@ import (
 	"os"
 	"reflect"
 	"strconv"
+	"strings"
 )
 
 const (
 	decadicBase = 10
-	envTag      = "env"
+	byteSize    = 8
+
+	envTag             = "env"
+	envTagDive         = "dive"
+	envTagIgnorePrefix = "ignoreprefix"
 
 	// envVarAppPrefix is the environment variable that holds the prefix for the
 	// environment variables specified by the `env` tag.
@@ -69,9 +74,8 @@ L:
 		switch tagVal {
 		case "":
 			continue L
-		case ",dive":
-			k := rf.Kind()
-			switch k { // nolint:exhaustive
+		case "," + envTagDive:
+			switch k := rf.Kind(); k { // nolint:exhaustive
 			case reflect.Struct:
 				if err := applyWithPrefix(rf, prefix); err != nil {
 					return err
@@ -84,7 +88,7 @@ L:
 					return err
 				}
 			default:
-				return fmt.Errorf("'dive' is not available to kind %q", k)
+				return fmt.Errorf("%q is not available to kind %q", envTagDive, k)
 			}
 		default:
 			envKey := envKey(tagVal, prefix)
@@ -102,6 +106,10 @@ L:
 }
 
 func envKey(envVar, prefix string) string {
+	const ignorePrefix = "," + envTagIgnorePrefix
+	if strings.Contains(envVar, ignorePrefix) {
+		return envVar[:strings.Index(envVar, ",")]
+	}
 	if prefix != "" {
 		return fmt.Sprintf("%s_%s", prefix, envVar)
 	}
@@ -124,19 +132,19 @@ func setValue(val string, rv reflect.Value) error {
 
 	switch fieldKind { //nolint:exhaustive
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		i, err := strconv.ParseInt(val, decadicBase, int(fieldType.Size()))
+		i, err := strconv.ParseInt(val, decadicBase, int(fieldType.Size()*byteSize))
 		if err != nil {
 			return err
 		}
 		rv.SetInt(i)
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-		u, err := strconv.ParseUint(val, decadicBase, int(fieldType.Size()))
+		u, err := strconv.ParseUint(val, decadicBase, int(fieldType.Size()*byteSize))
 		if err != nil {
 			return err
 		}
 		rv.SetUint(u)
 	case reflect.Float32, reflect.Float64:
-		f, err := strconv.ParseFloat(val, int(fieldType.Size()))
+		f, err := strconv.ParseFloat(val, int(fieldType.Size()*byteSize))
 		if err != nil {
 			return err
 		}
