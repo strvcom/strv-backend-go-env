@@ -21,8 +21,9 @@ type testConfig struct {
 	IntField                       int                         `env:"INT_FIELD"`
 	IntFieldNotSet                 int                         `env:"INT_FIELD_NOT_SET"`
 	BoolField                      bool                        `env:"BOOL_FIELD"`
-	UintField                      uint                        `env:"UIT_FIELD"`
+	UintField                      uint                        `env:"UINT_FIELD"`
 	FloatField                     float64                     `env:"FLOAT_FIELD"`
+	FloatFieldIgnorePrefix         float64                     `env:"FLOAT_FIELD_IGNORE_PREFIX,ignoreprefix"`
 	ArrayField                     *arrayWithTextUnmarshaller  `env:"ARRAY_FIELD"`
 	TypedField                     *enumWithTextUnmarshaller   `env:"TYPED_FIELD"`
 	TypedFieldNoPtr                enumWithTextUnmarshaller    `env:"TYPED_FIELD"`
@@ -86,7 +87,7 @@ func (s *structWithTextUnmarshaller) UnmarshalText(text []byte) error {
 
 type structErrUnmarshaller struct{}
 
-func (s *structErrUnmarshaller) UnmarshalText(text []byte) error {
+func (*structErrUnmarshaller) UnmarshalText([]byte) error {
 	return errors.New("test_err")
 }
 
@@ -129,10 +130,11 @@ func TestApplyWithPrefix(t *testing.T) {
 				em := enumWithTextUnmarshaller(2)
 
 				assert.Equal(t, "test", tc.StrField)
-				assert.Equal(t, int(1), tc.IntField)
+				assert.Equal(t, 99999999, tc.IntField)
 				assert.Equal(t, true, tc.BoolField)
-				assert.Equal(t, uint(1), tc.UintField)
-				assert.Equal(t, float64(1), tc.FloatField)
+				assert.Equal(t, uint(99999999), tc.UintField)
+				assert.Equal(t, 88888.456, tc.FloatField)
+				assert.Equal(t, 88888.456, tc.FloatFieldIgnorePrefix)
 				assert.Equal(t, &arrayWithTextUnmarshaller{"a", "b", "c"}, tc.ArrayField)
 				assert.Equal(t, em, *tc.TypedField)
 				assert.Equal(t, em, tc.TypedFieldNoPtr)
@@ -146,10 +148,11 @@ func TestApplyWithPrefix(t *testing.T) {
 			envVars: map[string]string{
 				"TEST_PTR_FIELD":               "ptr",
 				"TEST_STR_FIELD":               "test",
-				"TEST_INT_FIELD":               "1",
+				"TEST_INT_FIELD":               "99999999",
 				"TEST_BOOL_FIELD":              "true",
-				"TEST_UIT_FIELD":               "1",
-				"TEST_FLOAT_FIELD":             "1.0",
+				"TEST_UINT_FIELD":              "99999999",
+				"TEST_FLOAT_FIELD":             "88888.456",
+				"FLOAT_FIELD_IGNORE_PREFIX":    "88888.456",
 				"TEST_ARRAY_FIELD":             "a,b,c",
 				"TEST_TYPED_FIELD":             "c",
 				"TEST_STRUCT_FIELD":            "test",
