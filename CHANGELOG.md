@@ -1,14 +1,13 @@
 # Changelog
 How to release a new version:
-- Update this file with the latest versions.
-- Commit the changes with commit title `release(env): vX.X.X` (where `X.X.X` is the new version).
+- Update this file with the latest version.
 - Manually release new version.
 
 ## [Unreleased]
 
-## [0.0.1] - 2022-08-01
+## [0.1.0] - 2022-08-01
 ### Added
+- Added Changelog.
 
-- Added Changelog
-
-[0.0.1]: https://github.com/strvcom/strv-backend-go-env/releases/tag/v0.0.1
+[Unreleased]: https://github.com/strvcom/strv-backend-go-env/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/strvcom/strv-backend-go-env/releases/tag/v0.1.0
