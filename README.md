@@ -1,8 +1,7 @@
 # STRV env
 
-Go Library for runtime environment configuration.
+Go package for runtime environment configuration.
 
-## Description
 `env` package leverage Go's reflection functionality for scanning structures. If the `env` tag is found, a value of this tag is used for
 env lookup. If the env variable is set, the value in the structure is overridden. There are two ways how to process structures:
 - If a tag value contains `,dive`, inner fields of a structure are processed (`Session` in the example).
