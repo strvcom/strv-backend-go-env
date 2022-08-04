@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"time"
 
-	"go.strv.io/env"
+	envx "go.strv.io/env"
 )
 
 type debug bool
@@ -21,6 +21,7 @@ func (d *debug) UnmarshalText(text []byte) error {
 	b, err := strconv.ParseBool(string(text))
 	if err != nil {
 		return err
+
 	}
 	*d = debug(b)
 	return nil
@@ -48,7 +49,7 @@ func ExampleApply() {
 		panic(err)
 	}
 
-	env.MustApply(&cfg)
+	envx.MustApply(&cfg)
 
 	server := &http.Server{Addr: cfg.Addr}
 	fmt.Println("Starting HTTP server on address: ", cfg.Addr)
