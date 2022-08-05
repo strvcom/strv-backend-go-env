@@ -5,7 +5,7 @@ linters:
   # Enable specific linter
   # https://golangci-lint.run/usage/linters/#enabled-by-default-linters
   enable:
-    # defaults
+    # default linters
     - deadcode
     - errcheck
     - gosimple
@@ -16,27 +16,45 @@ linters:
     - typecheck
     - unused
     - varcheck
-    # not defaults
+    # extra linters
+    - bidichk
     - bodyclose
     - contextcheck
+    - cyclop
     - durationcheck
+    - errname
     - errorlint
     - exhaustive
-    # - exhaustruct
+    - gocognit
     - goconst
-    - gocyclo
-    # - godot
-    # - gofmt
+    - gocritic
+    - gofmt
     - gomnd
-    - ifshort
-    - ireturn
+    - gosec
+    - misspell
+    - nilerr
+    - nilnil
     - revive
+    - prealloc
+    - stylecheck
+    - tenv
+    - thelper
+    - tparallel
     - unconvert
     - unparam
+    - usestdlibvars
+    - wastedassign
+    - whitespace
 
-issues:
-  include:
-    - EXC0012 # exported (.+) should have comment( \(or a comment on this block\))? or be unexported
-    - EXC0013 # package comment should be of the form "(.+)...
-    - EXC0014 # package comment should be of the form "(.+)...
-    - EXC0015 # should have a package comment, unless it's in another file for this package
+linters-settings:
+  gomnd:
+    ignored-functions:
+      - 'strconv.Parse*'
+      - 'strconv.Format*'
+      - 'strings.SplitN'
+  goconst:
+    ignore-tests: true
+  gocognit:
+    min-complexity: 35
+  cyclop:
+    max-complexity: 20

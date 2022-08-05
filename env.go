@@ -108,6 +108,7 @@ L:
 func envKey(envVar, prefix string) string {
 	const ignorePrefix = "," + envTagIgnorePrefix
 	if strings.Contains(envVar, ignorePrefix) {
+		//nolint:gocritic
 		return envVar[:strings.Index(envVar, ",")]
 	}
 	if prefix != "" {
@@ -177,5 +178,4 @@ func setValue(val string, rv reflect.Value) error {
 		}
 	}
 	return nil
-
 }

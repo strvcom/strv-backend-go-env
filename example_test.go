@@ -50,6 +50,7 @@ func ExampleApply() {
 
 	env.MustApply(&cfg)
 
+	//nolint:gosec
 	server := &http.Server{Addr: cfg.Addr}
 	fmt.Println("Starting HTTP server on address: ", cfg.Addr)
 
