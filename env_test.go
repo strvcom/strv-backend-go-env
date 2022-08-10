@@ -126,6 +126,7 @@ func TestApplyWithPrefix(t *testing.T) {
 				prefix: "TEST",
 			},
 			testFn: func(t *testing.T, a args) {
+				t.Helper()
 				tc := a.target.(*testConfig)
 				em := enumWithTextUnmarshaller(2)
 
@@ -165,8 +166,7 @@ func TestApplyWithPrefix(t *testing.T) {
 				target: &testConfigInvalidArray{},
 				prefix: "TEST",
 			},
-			testFn: func(t *testing.T, a args) {
-			},
+			testFn: func(t *testing.T, a args) { t.Helper() },
 			envVars: map[string]string{
 				"TEST_ARR": `[test]`,
 			},
@@ -178,8 +178,7 @@ func TestApplyWithPrefix(t *testing.T) {
 				target: &testConfigUnsupportedKind{},
 				prefix: "TEST",
 			},
-			testFn: func(t *testing.T, a args) {
-			},
+			testFn: func(t *testing.T, a args) { t.Helper() },
 			envVars: map[string]string{
 				"TEST_COMPLEX": `42`,
 			},
@@ -191,8 +190,7 @@ func TestApplyWithPrefix(t *testing.T) {
 				target: &testConfigInvalidDive{},
 				prefix: "TEST",
 			},
-			testFn: func(t *testing.T, a args) {
-			},
+			testFn:  func(t *testing.T, a args) { t.Helper() },
 			envVars: map[string]string{},
 			wantErr: true,
 		},
@@ -202,8 +200,7 @@ func TestApplyWithPrefix(t *testing.T) {
 				target: testConfigInvalidDive{},
 				prefix: "TEST",
 			},
-			testFn: func(t *testing.T, a args) {
-			},
+			testFn:  func(t *testing.T, a args) { t.Helper() },
 			envVars: map[string]string{},
 			wantErr: true,
 		},
@@ -213,8 +210,7 @@ func TestApplyWithPrefix(t *testing.T) {
 				target: intPtr(1),
 				prefix: "TEST",
 			},
-			testFn: func(t *testing.T, a args) {
-			},
+			testFn:  func(t *testing.T, a args) { t.Helper() },
 			envVars: map[string]string{},
 			wantErr: true,
 		},
@@ -224,8 +220,7 @@ func TestApplyWithPrefix(t *testing.T) {
 				target: &testConfigUnmarshalErr{},
 				prefix: "TEST",
 			},
-			testFn: func(t *testing.T, a args) {
-			},
+			testFn: func(t *testing.T, a args) { t.Helper() },
 			envVars: map[string]string{
 				"TEST_STRUCT_ERR_UNMARSHALER": "err",
 			},
