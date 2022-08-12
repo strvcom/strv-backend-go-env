@@ -21,7 +21,6 @@ func (d *debug) UnmarshalText(text []byte) error {
 	b, err := strconv.ParseBool(string(text))
 	if err != nil {
 		return err
-
 	}
 	*d = debug(b)
 	return nil
