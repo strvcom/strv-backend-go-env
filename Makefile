@@ -19,5 +19,5 @@ lint:
 ifeq ($(shell which golangci-lint),)
 	$(error command 'golangci-lint' not found)
 else
-	golangci-lint run ./...
+	golangci-lint run ./....
 endif
