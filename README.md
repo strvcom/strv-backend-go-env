@@ -1,5 +1,9 @@
 # STRV env
 
+![Latest release][release]
+[![codecov][codecov-img]][codecov]
+![GitHub][license]
+
 Go package for runtime environment configuration.
 
 `env` package leverage Go's reflection functionality for scanning structures. If the `env` tag is found, a value of this tag is used for
@@ -42,3 +46,8 @@ func main() {
 ```
 
 See detailed [example](./example_test.go).
+
+[release]: https://img.shields.io/github/v/release/strvcom/strv-backend-go-env
+[codecov]: https://codecov.io/gh/strvcom/strv-backend-go-env
+[codecov-img]: https://codecov.io/gh/strvcom/strv-backend-go-env/branch/master/graph/badge.svg?token=0R45D7QB8L
+[license]: https://img.shields.io/github/license/strvcom/strv-backend-go-env
