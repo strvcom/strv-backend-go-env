@@ -52,7 +52,7 @@ func ExampleApply() {
 
 	//nolint:gosec
 	server := &http.Server{Addr: cfg.Addr}
-	fmt.Println("Starting HTTP server on address: ", cfg.Addr)
+	_, _ = fmt.Println("Starting HTTP server on address: ", cfg.Addr)
 
 	go func() {
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
