@@ -1,4 +1,4 @@
-⚠ This repository has been archived, as we are now using [caarlos0/env](https://github.com/caarlos0/env) module instead.
+⚠️ This repository has been archived, as we are now using [caarlos0/env](https://github.com/caarlos0/env) module instead.
 
 # STRV env
 
